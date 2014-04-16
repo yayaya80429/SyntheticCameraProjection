@@ -1,6 +1,7 @@
 close all
 % 
-[x,y,z] = peaks(100); range=1:51; x = x(range, :); y = y(range, :); z=z(range, :); pt3d = [x(:) y(:), z(:)]';
+% [x,y,z] = sphere(100); range=1:51; x = x(range, :); y = y(range, :); z=z(range, :); pt3d = [x(:) y(:), z(:)]';
+[x,y,z] = peaks(100); x = x / max(x(:)); y = y / max(y(:)); z = z / max(z(:)); x = x(:); y = y(:); z=z(:); pt3d = [x(:) y(:), z(:)]';
 % load('bunny.mat'); pt3d = bunny;
 % pt3d = randn(3, Npt);
 
@@ -67,16 +68,15 @@ plot3(camera_L(1, [4, 1]), camera_L(2, [4, 1]), camera_L(3, [4, 1]), 'r');
 plot3(camera_L(1, [4, 2]), camera_L(2, [4, 2]), camera_L(3, [4, 2]), 'g');
 plot3(camera_L(1, [4, 3]), camera_L(2, [4, 3]), camera_L(3, [4, 3]), 'b');
 
-plot3(camera_R(1, [4, 1]), camera_R(2, [4, 1]), camera_R(3, [4, 1]), 'r');
-plot3(camera_R(1, [4, 2]), camera_R(2, [4, 2]), camera_R(3, [4, 2]), 'g');
-plot3(camera_R(1, [4, 3]), camera_R(2, [4, 3]), camera_R(3, [4, 3]), 'b');
+plot3(camera_R(1, [4, 1]), camera_R(2, [4, 1]), camera_R(3, [4, 1]), 'k');
+plot3(camera_R(1, [4, 2]), camera_R(2, [4, 2]), camera_R(3, [4, 2]), 'k');
+plot3(camera_R(1, [4, 3]), camera_R(2, [4, 3]), camera_R(3, [4, 3]), 'k');
 scatter3(pt3d(1, :), pt3d(2, :), pt3d(3, :), 10, 1:Npt)
 
 axis([-2, 2, -2, 2, -2, 2]);
 xlabel('X'), ylabel('Y'), zlabel('Z')
 grid on
 hold off
-
 
 %% sample pt2d on image
 inRangeIdx = pt2dL(1, :) > 0 & pt2dL(1, :) < width & pt2dL(2, :) > 0 & pt2dL(2, :) < height...
@@ -90,21 +90,11 @@ A = [sampPt_R(1, :)'.*sampPt_L(1, :)' sampPt_R(1, :)'.*sampPt_L(2, :)' sampPt_R(
 sampPt_R(2, :)'.*sampPt_L(1, :)' sampPt_R(2, :)'.*sampPt_L(2, :)' sampPt_R(2, :)'.*sampPt_L(3, :)' ...
 sampPt_R(3, :)'.*sampPt_L(1, :)' sampPt_R(3, :)'.*sampPt_L(2, :)' sampPt_R(3, :)'.*sampPt_L(3, :)'];
 
-F1 = null(A);
-F1 = reshape(F1, 3, 3)';
+F2 = null(A);
+F2 = reshape(F2, 3, 3)';
 
 [U, D, V] = svd(A, 0);
 
-F2 = reshape(V(:,9),3,3)';
-[U,D,V] = svd(F2,0);
+F = reshape(V(:,9),3,3)';
+[U,D,V] = svd(F,0);
 F3 = U*diag([D(1,1) D(2,2) 0])*V';
-
-[sampPt_L, T1] = normalise2dpts(sampPt_L);
-[sampPt_R, T2] = normalise2dpts(sampPt_R);
- % Denormalise
-F4 = T2'*F3*T1;
-
-exp1 = A*reshape(F1', 9,1);
-exp2 = A*reshape(F2', 9,1);
-exp3 = A*reshape(F3', 9,1);
-exp4 = A*reshape(F4', 9,1);
